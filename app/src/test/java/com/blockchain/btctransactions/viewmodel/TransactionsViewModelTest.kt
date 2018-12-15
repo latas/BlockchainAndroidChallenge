@@ -3,11 +3,12 @@ package com.blockchain.btctransactions.viewmodel
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import com.blockchain.btctransactions.core.data.Result
-import com.blockchain.btctransactions.data.Wallet
 import com.blockchain.btctransactions.domain.GetWalletInfoUseCase
 import com.blockchain.btctransactions.testXPub
+import com.blockchain.btctransactions.ui.TransactionItemViewModel
 import com.blockchain.btctransactions.ui.TransactionsViewModel
 import com.blockchain.btctransactions.wallet_with_no_transactions
+import com.blockchain.btctransactions.wallet_with_transactions
 import io.reactivex.Observable
 import org.junit.Assert
 import org.junit.Before
@@ -15,9 +16,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.times
 import org.mockito.MockitoAnnotations
-import java.lang.Exception
 
 class TransactionsViewModelTest {
 
@@ -31,6 +30,8 @@ class TransactionsViewModelTest {
     private lateinit var refreshStopObserver: Observer<Unit?>
     @Mock
     private lateinit var pullToRefreshEnabledObserver: Observer<Boolean>
+    @Mock
+    private lateinit var transactionItemsObserver: Observer<List<TransactionItemViewModel>>
 
     @Rule
     @JvmField
@@ -46,6 +47,7 @@ class TransactionsViewModelTest {
         viewModel.loading.observeForever(loadingObserver)
         viewModel.pullToRefreshEnabled.observeForever(pullToRefreshEnabledObserver)
         viewModel.refreshStopped.observeForever(refreshStopObserver)
+        viewModel.transactionItemsViewModel.observeForever(transactionItemsObserver)
     }
 
     @Test
@@ -95,8 +97,6 @@ class TransactionsViewModelTest {
 
         Mockito.verify(balanceObserver)
             .onChanged(String())
-
-        Assert.assertEquals(String(), viewModel.balance.value)
         Mockito.verifyNoMoreInteractions(balanceObserver)
 
     }
@@ -199,7 +199,31 @@ class TransactionsViewModelTest {
         viewModel.multiAddrParameter.onNext(testXPub)
 
         Mockito.verify(pullToRefreshEnabledObserver).onChanged(false)
-
         Mockito.verifyNoMoreInteractions(pullToRefreshEnabledObserver)
+    }
+
+    @Test
+    fun testTransactionItemsListIsNotTriggeredWhenSuccessIsNotReturned() {
+        Mockito.`when`(getWalletInfoUseCase.execute(testXPub)).thenReturn(
+            Observable.just(
+                Result.Loading, Result.Error(java.lang.Exception())
+            )
+        )
+        viewModel.multiAddrParameter.onNext(testXPub)
+
+        Mockito.verify(transactionItemsObserver, Mockito.never()).onChanged(Mockito.any())
+    }
+
+    @Test
+    fun testTransactionItemsListIsTriggeredWhenSuccessIsReturned() {
+        Mockito.`when`(getWalletInfoUseCase.execute(testXPub)).thenReturn(
+            Observable.just(
+                Result.Success(wallet_with_transactions)
+            )
+        )
+        viewModel.multiAddrParameter.onNext(testXPub)
+
+        Mockito.verify(transactionItemsObserver)
+            .onChanged(wallet_with_transactions.transactionItems.map { TransactionItemViewModel(it) })
     }
 }

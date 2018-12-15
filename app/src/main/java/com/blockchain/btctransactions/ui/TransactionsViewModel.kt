@@ -5,6 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.blockchain.btctransactions.core.data.Result
+import com.blockchain.btctransactions.core.utils.mapSuccess
+import com.blockchain.btctransactions.data.TransactionItem
 import com.blockchain.btctransactions.data.Wallet
 import com.blockchain.btctransactions.domain.GetWalletInfoUseCase
 import io.reactivex.disposables.CompositeDisposable
@@ -33,16 +35,23 @@ class TransactionsViewModel @Inject constructor(getWalletUseCase: GetWalletInfoU
     val loading: LiveData<Boolean> = Transformations.map(wallet) { resource ->
         resource.isLoading
     }
-
     val pullToRefreshEnabled: LiveData<Boolean> = Transformations.map(loading) {
         it.not()
     }
-
-    val refreshStopped: LiveData<Unit?> = Transformations.map(wallet) { result ->
+    val refreshStopped: LiveData<Unit> = Transformations.map(wallet) { result ->
         if (result.isLoading.not()) {
             Unit
         }
     }
+
+    private val transactionItems: LiveData<List<TransactionItem>> = wallet.mapSuccess {
+        it.transactionItems
+    }
+
+    val transactionItemsViewModel = Transformations.map(transactionItems) {
+        it.map { item -> TransactionItemViewModel(item) }
+    }
+
 
     private val pullToRefreshObservable =
         pullToRefreshTriggered.withLatestFrom(multiAddrParameter).map { (_, parameter) ->
