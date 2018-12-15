@@ -1,0 +1,24 @@
+ext.version = [
+        support_appcompat  : "1.0.2",
+        constraintlayout   : "2.0.0-alpha2",
+        recycler           : "1.0.0",
+        dagger             : "2.15",
+        junit              : "4.12"
+]
+
+def version = ext.version
+
+ext.library = [
+        kotlin                     : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version",
+        support_appcompat          : "androidx.appcompat:appcompat:${version.support_appcompat}",
+        constraintlayout           : "androidx.constraintlayout:constraintlayout:${version.constraintlayout}",
+        recycler                   : "androidx.recyclerview:recyclerview:${version.recycler}",
+        junit                      : "junit:junit:${version.junit}",
+
+        dagger                     : "com.google.dagger:dagger:${version.dagger}",
+        dagger_android             : "com.google.dagger:dagger-android:${version.dagger}",
+        dagger_android_support     : "com.google.dagger:dagger-android-support:${version.dagger}",
+        dagger_annotation_processor: "com.google.dagger:dagger-android-processor:${version.dagger}",
+        dagger_compiler            : "com.google.dagger:dagger-compiler:${version.dagger}",
+
+]
