@@ -1,4 +1,9 @@
 package com.blockchain.btctransactions.ui
 
-class TransactionsViewModel {
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import javax.inject.Inject
+
+class TransactionsViewModel @Inject constructor() : ViewModel() {
+    val balance = MutableLiveData<String>()
 }
