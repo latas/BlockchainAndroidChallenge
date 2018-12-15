@@ -37,7 +37,8 @@ dependencies {
 
     implementation "${library.lifecycle_extension}"
 
-
+    implementation "${library.rxAndroid}"
+    implementation "${library.rxKotlin}"
     implementation "${library.dagger}"
     implementation "${library.dagger_android}"
     implementation "${library.dagger_android_support}"

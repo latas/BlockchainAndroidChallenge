@@ -4,6 +4,8 @@ ext.version = [
         recycler           : "1.0.0",
         lifecycle_extension: "2.0.0",
         dagger             : "2.15",
+        rx                 : "2.0.1",
+        rxKotlin           : "2.2.0",
         junit              : "4.12"
 ]
 
@@ -15,7 +17,8 @@ ext.library = [
         constraintlayout           : "androidx.constraintlayout:constraintlayout:${version.constraintlayout}",
         recycler                   : "androidx.recyclerview:recyclerview:${version.recycler}",
         junit                      : "junit:junit:${version.junit}",
-
+        rxAndroid                  : "io.reactivex.rxjava2:rxandroid:${version.rx}",
+        rxKotlin                   : "io.reactivex.rxjava2:rxkotlin:${version.rxKotlin}",
         dagger                     : "com.google.dagger:dagger:${version.dagger}",
         dagger_android             : "com.google.dagger:dagger-android:${version.dagger}",
         dagger_android_support     : "com.google.dagger:dagger-android-support:${version.dagger}",

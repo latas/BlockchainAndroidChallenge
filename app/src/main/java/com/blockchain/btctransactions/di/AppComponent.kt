@@ -12,6 +12,7 @@ import dagger.android.AndroidInjectionModule
     modules = [
         AndroidInjectionModule::class,
         ActivityModule::class,
+        UseCaseModule::class,
         ViewModelModule::class
     ]
 )
