@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import com.blockchain.btctransactions.core.data.Resource
+import com.blockchain.btctransactions.core.data.Result
 import com.blockchain.btctransactions.data.Wallet
 import com.blockchain.btctransactions.domain.GetWalletInfoUseCase
 import io.reactivex.disposables.CompositeDisposable
@@ -13,19 +13,24 @@ import io.reactivex.subjects.BehaviorSubject
 import javax.inject.Inject
 
 class TransactionsViewModel @Inject constructor(getWalletUseCase: GetWalletInfoUseCase) : ViewModel() {
+    private val bag = CompositeDisposable()
+    private val wallet = MutableLiveData<Result<Wallet>>()
 
     //input
     val multiAddrParameter = BehaviorSubject.create<String>()
 
-    private val bag = CompositeDisposable()
-    private val wallet = MutableLiveData<Resource<Wallet>>()
-
+    //outputs
     val balance: LiveData<String> = Transformations.map(wallet) { resource ->
         when (resource) {
-            is Resource.Success -> resource.data.balance.toString()
+            is Result.Success -> resource.data.balance.toString()
             else -> String()
         }
     }
+
+    val loading: LiveData<Boolean> = Transformations.map(wallet) { resource ->
+        resource.isLoading
+    }
+
 
     init {
         multiAddrParameter.distinct().switchMap { parameter ->
