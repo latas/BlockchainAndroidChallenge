@@ -9,7 +9,9 @@ import com.blockchain.btctransactions.data.Wallet
 import com.blockchain.btctransactions.domain.GetWalletInfoUseCase
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.withLatestFrom
 import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
 
 class TransactionsViewModel @Inject constructor(getWalletUseCase: GetWalletInfoUseCase) : ViewModel() {
@@ -17,7 +19,8 @@ class TransactionsViewModel @Inject constructor(getWalletUseCase: GetWalletInfoU
     private val wallet = MutableLiveData<Result<Wallet>>()
 
     //input
-    val multiAddrParameter = BehaviorSubject.create<String>()
+    val multiAddrParameter: BehaviorSubject<String> = BehaviorSubject.create<String>()
+    val pullToRefreshTriggered: PublishSubject<Unit> = PublishSubject.create<Unit>()
 
     //outputs
     val balance: LiveData<String> = Transformations.map(wallet) { resource ->
@@ -31,10 +34,34 @@ class TransactionsViewModel @Inject constructor(getWalletUseCase: GetWalletInfoU
         resource.isLoading
     }
 
+    val pullToRefreshEnabled: LiveData<Boolean> = Transformations.map(loading) {
+        it.not()
+    }
+
+    val refreshStopped: LiveData<Unit?> = Transformations.map(wallet) { result ->
+        if (result.isLoading.not()) {
+            Unit
+        }
+    }
+
+    private val pullToRefreshObservable =
+        pullToRefreshTriggered.withLatestFrom(multiAddrParameter).map { (_, parameter) ->
+            parameter to false
+        }
+
+    private val multiAddressInputObservable = multiAddrParameter.distinct().map { parameter ->
+        parameter to true
+    }
 
     init {
-        multiAddrParameter.distinct().switchMap { parameter ->
-            getWalletUseCase.execute(parameter)
+        multiAddressInputObservable.mergeWith(pullToRefreshObservable).switchMap { (parameter, showLoading) ->
+            getWalletUseCase.execute(parameter).filter {
+                if (!showLoading) {
+                    !it.isLoading
+                } else {
+                    true
+                }
+            }
         }.subscribe {
             wallet.postValue(it)
         }.addTo(bag)
