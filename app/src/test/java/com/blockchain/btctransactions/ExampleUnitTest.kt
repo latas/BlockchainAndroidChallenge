@@ -1,5 +1,6 @@
 package com.blockchain.btctransactions
 
+import org.junit.Assert
 import org.junit.Test
 
 import org.junit.Assert.*

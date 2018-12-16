@@ -20,6 +20,11 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField 'String', 'BASE_URL', '"https://blockchain.info/"'
+        }
+        debug {
+            debuggable true
+            buildConfigField 'String', 'BASE_URL', '"https://blockchain.info/"'
         }
     }
 
@@ -44,6 +49,9 @@ dependencies {
     implementation "${library.dagger_android_support}"
     kapt "${library.dagger_annotation_processor}"
     kapt "${library.dagger_compiler}"
+    implementation "${library.retrofit}"
+    implementation "${library.retrofitGson}"
+    implementation "${library.retrofitRx}"
     testImplementation "${library.junit}"
     testImplementation "${library.mockito}"
     testImplementation "${library.arch_core_testing}"

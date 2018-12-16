@@ -16,29 +16,6 @@ fun <T : Any, U> LiveData<Result<T>>.mapSuccess(func: (T) -> U): LiveData<U> {
     return mediatorLiveData
 }
 
-fun <T : Any> LiveData<Result<T>>.filterSuccess(): LiveData<Result.Success<T>> {
-    val mediatorLiveData: MediatorLiveData<Result.Success<T>> = MediatorLiveData()
-    mediatorLiveData.addSource(this) {
-        when (it) {
-            is Result.Success -> {
-                mediatorLiveData.postValue(it)
-            }
-        }
-    }
-    return mediatorLiveData
-}
-
-fun <T : Any> LiveData<Result<T>>.filterError(): LiveData<Result.Error> {
-    val mediatorLiveData: MediatorLiveData<Result.Error> = MediatorLiveData()
-    mediatorLiveData.addSource(this) {
-        when (it) {
-            is Result.Error -> {
-                mediatorLiveData.postValue(it)
-            }
-        }
-    }
-    return mediatorLiveData
-}
 
 
 fun <A, B> LiveData<A>.merge(b: LiveData<B>): LiveData<Pair<A?, B?>> = mergeLiveData(this, b)

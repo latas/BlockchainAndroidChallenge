@@ -91,7 +91,6 @@ class TransactionsViewModel @Inject constructor(
         resourceFacade.getString(R.string.common_error_message)
     }.single()
 
-
     init {
         multiAddressInputObservable.mergeWith(pullToRefreshTriggeredObservable).mergeWith(retryTriggeredObservable)
             .switchMap { (parameter, showLoading) ->

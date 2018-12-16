@@ -6,6 +6,7 @@ ext.version = [
         dagger             : "2.15",
         rx                 : "2.0.1",
         rxKotlin           : "2.2.0",
+        retrofit           : "2.4.0",
         mockito            : "2.19.1",
         junit              : "4.12"
 ]
@@ -20,6 +21,9 @@ ext.library = [
         junit                      : "junit:junit:${version.junit}",
         rxAndroid                  : "io.reactivex.rxjava2:rxandroid:${version.rx}",
         rxKotlin                   : "io.reactivex.rxjava2:rxkotlin:${version.rxKotlin}",
+        retrofit                   : "com.squareup.retrofit2:retrofit:${version.retrofit}",
+        retrofitGson               : "com.squareup.retrofit2:converter-gson:${version.retrofit}",
+        retrofitRx                 : "com.squareup.retrofit2:adapter-rxjava2:${version.retrofit}",
         dagger                     : "com.google.dagger:dagger:${version.dagger}",
         dagger_android             : "com.google.dagger:dagger-android:${version.dagger}",
         dagger_android_support     : "com.google.dagger:dagger-android-support:${version.dagger}",
@@ -28,4 +32,5 @@ ext.library = [
         lifecycle_extension        : "androidx.lifecycle:lifecycle-extensions:${version.lifecycle_extension}",
         arch_core_testing          : "androidx.arch.core:core-testing:${version.lifecycle_extension}",
         mockito                    : "org.mockito:mockito-core:${version.mockito}"
+
 ]
