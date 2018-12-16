@@ -8,6 +8,8 @@ ext.version = [
         rxKotlin           : "2.2.0",
         retrofit           : "2.4.0",
         mockito            : "2.19.1",
+        mockwebserver       : "3.11.0",
+        okio               : "1.14.1",
         junit              : "4.12"
 ]
 
@@ -31,6 +33,8 @@ ext.library = [
         dagger_compiler            : "com.google.dagger:dagger-compiler:${version.dagger}",
         lifecycle_extension        : "androidx.lifecycle:lifecycle-extensions:${version.lifecycle_extension}",
         arch_core_testing          : "androidx.arch.core:core-testing:${version.lifecycle_extension}",
+        okio                       : "com.squareup.okio:okio:${version.okio}",
+        mockwebserver              : "com.squareup.okhttp3:mockwebserver:${version.mockwebserver}",
         mockito                    : "org.mockito:mockito-core:${version.mockito}"
 
 ]

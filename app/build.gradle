@@ -55,6 +55,8 @@ dependencies {
     testImplementation "${library.junit}"
     testImplementation "${library.mockito}"
     testImplementation "${library.arch_core_testing}"
+    testImplementation "${library.okio}"
+    testImplementation "${library.mockwebserver}"
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }

@@ -1,11 +1,11 @@
 package com.blockchain.btctransactions.core.api
 
-import androidx.lifecycle.LiveData
+import com.blockchain.btctransactions.data.MultiAddressData
 import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface AppService {
-    @GET
-    fun getUser(@Query("active") parameter: String): Single<MultiAddressResponse>
+    @GET("multiaddr")
+    fun multiAddress(@Query("active") parameter: String): Single<MultiAddressData>
 }
