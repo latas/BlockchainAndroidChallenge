@@ -2,11 +2,14 @@ package com.blockchain.btctransactions.api
 
 import org.junit.Test
 import org.mockito.Mockito
+import retrofit2.HttpException
+import java.net.SocketTimeoutException
+import java.util.concurrent.TimeUnit
 
 class MultiAddressApiTest : ApiTest() {
 
     @Test
-    fun getPlayerServiceWithSuccess() {
+    fun getMultiAddressServiceWithSuccess() {
         enqueueResponse("multiaddress_sample_response.json")
         val mSubscriber = service.multiAddress(Mockito.anyString()).test()
         mSubscriber.assertNoErrors()
@@ -28,5 +31,31 @@ class MultiAddressApiTest : ApiTest() {
 
     }
 
+    @Test
+    fun getMultiAddressServiceWithError() {
+        enqueueResponse("multiaddress_error_invalid_key.json", responseCode = 500)
+        val mSubscriber = service.multiAddress(Mockito.anyString()).test()
+        mSubscriber.assertError {
+            it is HttpException &&
+                    it.code() == 500
+        }
+        mSubscriber.awaitTerminalEvent()
+        mSubscriber.assertTerminated()
+        mSubscriber.assertNotComplete()
+        mSubscriber.assertNoValues()
+    }
 
+    @Test
+    fun getMultiAddressServiceWithSocketTimeoutError() {
+        enqueueResponse("multiaddress_sample_response.json", responseCode = 200, noResponse = true)
+        val mSubscriber = service.multiAddress(Mockito.anyString()).test()
+        mSubscriber.awaitTerminalEvent(2, TimeUnit.SECONDS)
+        mSubscriber.assertError {
+            it is SocketTimeoutException
+        }
+        mSubscriber.assertNotComplete()
+        mSubscriber.assertNoValues()
+    }
 }
+
+
