@@ -1,8 +1,10 @@
 package com.blockchain.btctransactions.core.data
 
-sealed class Result<out T> {
+import java.lang.Error
 
-    data class Success<out T>(val data: T) : Result<T>()
+sealed class Result<out T : Any> {
+
+    data class Success<out T : Any>(val data: T) : Result<T>()
     data class Error(val exception: Exception) : Result<Nothing>()
     object Loading : Result<Nothing>()
 
@@ -15,6 +17,12 @@ sealed class Result<out T> {
     val isSuccess: Boolean
         get() = when (this) {
             is Success -> true
+            else -> false
+        }
+
+    val isError: Boolean
+        get() = when (this) {
+            is Error -> true
             else -> false
         }
 }

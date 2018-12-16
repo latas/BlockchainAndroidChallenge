@@ -4,8 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import com.blockchain.btctransactions.R
+import com.blockchain.btctransactions.core.data.ResourceFacade
 import com.blockchain.btctransactions.core.data.Result
-import com.blockchain.btctransactions.core.utils.mapSuccess
+import com.blockchain.btctransactions.core.utils.*
 import com.blockchain.btctransactions.data.TransactionItem
 import com.blockchain.btctransactions.data.Wallet
 import com.blockchain.btctransactions.domain.GetWalletInfoUseCase
@@ -14,9 +16,14 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.withLatestFrom
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
+import java.lang.Error
 import javax.inject.Inject
 
-class TransactionsViewModel @Inject constructor(getWalletUseCase: GetWalletInfoUseCase) : ViewModel() {
+class TransactionsViewModel @Inject constructor(
+    getWalletUseCase: GetWalletInfoUseCase,
+    resourceFacade: ResourceFacade
+) : ViewModel() {
+
     private val bag = CompositeDisposable()
     private val wallet = MutableLiveData<Result<Wallet>>()
 
@@ -48,9 +55,24 @@ class TransactionsViewModel @Inject constructor(getWalletUseCase: GetWalletInfoU
         it.transactionItems
     }
 
-    val transactionItemsViewModel = Transformations.map(transactionItems) {
+    val transactionItemsViewModel: LiveData<List<TransactionItemViewModel>> = Transformations.map(transactionItems) {
         it.map { item -> TransactionItemViewModel(item) }
     }
+
+    //we want to show the error ui only when an error occurs and the list is empty otherwise show an alert dialog
+    val errorUiVisible = Transformations.map(wallet.merge(transactionItems)) { (result, items) ->
+        when (result) {
+            is Error -> items?.isEmpty() ?: true
+            else -> false
+        }
+    }
+
+    val errorDialog: LiveData<String> = Transformations.map(wallet.merge(transactionItems)) { (result, items) ->
+        when (result) {
+            is Error -> if (items?.isEmpty() == true) resourceFacade.getString(R.string.common_error_message) else null
+            else -> null
+        }
+    }.filterNulls().single()
 
 
     private val pullToRefreshObservable =
@@ -74,6 +96,10 @@ class TransactionsViewModel @Inject constructor(getWalletUseCase: GetWalletInfoU
         }.subscribe {
             wallet.postValue(it)
         }.addTo(bag)
+    }
+
+    fun retry() {
+
     }
 
     override fun onCleared() {
