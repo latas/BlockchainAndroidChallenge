@@ -9,11 +9,11 @@ val testXPub =
     "xpub6CfLQa8fLgtouvLxrb8EtvjbXfoC1yqzH6YbTJw4dP7srt523AhcMV8Uh4K3TWSHz9oDWmn9MuJogzdGU3ncxkBsAC9wFBLmFrWT9Ek81kQ"
 
 val wallet_with_no_transactions = Wallet(
-    31.54988324, listOf()
+    "31.54988324", listOf()
 )
 
 val wallet_with_transactions = Wallet(
-    32.63278412,
+    "32.63278412",
     listOf(
         transaction {
             hash = "123"

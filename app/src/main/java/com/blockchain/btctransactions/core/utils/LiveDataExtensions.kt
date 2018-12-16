@@ -16,6 +16,31 @@ fun <T : Any, U> LiveData<Result<T>>.mapSuccess(func: (T) -> U): LiveData<U> {
     return mediatorLiveData
 }
 
+fun <T : Any> LiveData<Result<T>>.filterSuccess(): LiveData<Result.Success<T>> {
+    val mediatorLiveData: MediatorLiveData<Result.Success<T>> = MediatorLiveData()
+    mediatorLiveData.addSource(this) {
+        when (it) {
+            is Result.Success -> {
+                mediatorLiveData.postValue(it)
+            }
+        }
+    }
+    return mediatorLiveData
+}
+
+fun <T : Any> LiveData<Result<T>>.filterError(): LiveData<Result.Error> {
+    val mediatorLiveData: MediatorLiveData<Result.Error> = MediatorLiveData()
+    mediatorLiveData.addSource(this) {
+        when (it) {
+            is Result.Error -> {
+                mediatorLiveData.postValue(it)
+            }
+        }
+    }
+    return mediatorLiveData
+}
+
+
 fun <A, B> LiveData<A>.merge(b: LiveData<B>): LiveData<Pair<A?, B?>> = mergeLiveData(this, b)
 
 fun <A, B> mergeLiveData(a: LiveData<A>, b: LiveData<B>): LiveData<Pair<A?, B?>> {
@@ -47,12 +72,11 @@ fun <T> LiveData<T>.single(): LiveData<T> {
     return singleLiveData
 }
 
-fun <T : Any> LiveData<T?>.filterNulls(): LiveData<T> {
-    val mediatorLiveData: MediatorLiveData<T> = MediatorLiveData()
-    mediatorLiveData.addSource(this) {
-        if (it != null) {
-            mediatorLiveData.postValue(value)
-        }
+inline fun <T> LiveData<T>.filter(crossinline predicate: (T?) -> Boolean): LiveData<T> {
+    val mutableLiveData: MediatorLiveData<T> = MediatorLiveData()
+    mutableLiveData.addSource(this) {
+        if (predicate(it))
+            mutableLiveData.value = it
     }
-    return mediatorLiveData
+    return mutableLiveData
 }

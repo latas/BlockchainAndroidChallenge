@@ -1,3 +1,3 @@
 package com.blockchain.btctransactions.data
 
-data class Wallet(val balance: Double, val transactionItems: List<TransactionItem>)
+data class Wallet(val balance: String, val transactionItems: List<TransactionItem>)

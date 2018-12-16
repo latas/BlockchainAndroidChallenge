@@ -2,6 +2,8 @@ package com.blockchain.btctransactions.viewmodel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
+import com.blockchain.btctransactions.R
+import com.blockchain.btctransactions.core.data.ResourceFacade
 import com.blockchain.btctransactions.core.data.Result
 import com.blockchain.btctransactions.domain.GetWalletInfoUseCase
 import com.blockchain.btctransactions.testXPub
@@ -27,11 +29,17 @@ class TransactionsViewModelTest {
     @Mock
     private lateinit var loadingObserver: Observer<Boolean>
     @Mock
+    private lateinit var resourceFacade: ResourceFacade
+    @Mock
     private lateinit var refreshStopObserver: Observer<Unit?>
     @Mock
     private lateinit var pullToRefreshEnabledObserver: Observer<Boolean>
     @Mock
     private lateinit var transactionItemsObserver: Observer<List<TransactionItemViewModel>>
+    @Mock
+    private lateinit var errorUiWidgetVisibilityObserver: Observer<Boolean>
+    @Mock
+    private lateinit var errorDialogObserver: Observer<String>
 
     @Rule
     @JvmField
@@ -42,12 +50,14 @@ class TransactionsViewModelTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        viewModel = TransactionsViewModel(getWalletInfoUseCase)
+        viewModel = TransactionsViewModel(getWalletInfoUseCase, resourceFacade)
         viewModel.balance.observeForever(balanceObserver)
         viewModel.loading.observeForever(loadingObserver)
         viewModel.pullToRefreshEnabled.observeForever(pullToRefreshEnabledObserver)
         viewModel.refreshStopped.observeForever(refreshStopObserver)
         viewModel.transactionItemsViewModel.observeForever(transactionItemsObserver)
+        viewModel.errorUiWidgetVisible.observeForever(errorUiWidgetVisibilityObserver)
+        viewModel.showErrorDialog.observeForever(errorDialogObserver)
     }
 
     @Test
@@ -81,9 +91,9 @@ class TransactionsViewModelTest {
             .onChanged(String())
 
         Mockito.verify(balanceObserver)
-            .onChanged(wallet_with_no_transactions.balance.toString())
+            .onChanged(wallet_with_no_transactions.balance)
 
-        Assert.assertEquals(wallet_with_no_transactions.balance.toString(), viewModel.balance.value)
+        Assert.assertEquals(wallet_with_no_transactions.balance, viewModel.balance.value)
     }
 
     @Test
@@ -203,7 +213,7 @@ class TransactionsViewModelTest {
     }
 
     @Test
-    fun testTransactionItemsListIsNotTriggeredWhenSuccessIsNotReturned() {
+    fun transactionItemsListIsNotTriggeredWhenSuccessIsNotReturned() {
         Mockito.`when`(getWalletInfoUseCase.execute(testXPub)).thenReturn(
             Observable.just(
                 Result.Loading, Result.Error(java.lang.Exception())
@@ -215,7 +225,7 @@ class TransactionsViewModelTest {
     }
 
     @Test
-    fun testTransactionItemsListIsTriggeredWhenSuccessIsReturned() {
+    fun transactionItemsListIsTriggeredWhenSuccessIsReturned() {
         Mockito.`when`(getWalletInfoUseCase.execute(testXPub)).thenReturn(
             Observable.just(
                 Result.Success(wallet_with_transactions)
@@ -225,5 +235,90 @@ class TransactionsViewModelTest {
 
         Mockito.verify(transactionItemsObserver)
             .onChanged(wallet_with_transactions.transactionItems.map { TransactionItemViewModel(it) })
+    }
+
+    @Test
+    fun errorUiWidgetIsNotVisibleWhenAnErrorOccursAfterSuccess() {
+        Mockito.`when`(getWalletInfoUseCase.execute(testXPub)).thenReturn(
+            Observable.just(
+                Result.Success(wallet_with_transactions), Result.Error(java.lang.Exception())
+            )
+        )
+        viewModel.multiAddrParameter.onNext(testXPub)
+
+        Mockito.verify(errorUiWidgetVisibilityObserver, Mockito.never()).onChanged(true)
+        Assert.assertFalse(viewModel.errorUiWidgetVisible.value!!)
+    }
+
+    @Test
+    fun errorUiWidgetIsVisibleWhenAnErrorOccursWithoutPreviousSuccess() {
+        Mockito.`when`(getWalletInfoUseCase.execute(testXPub)).thenReturn(
+            Observable.just(
+                Result.Loading, Result.Error(java.lang.Exception())
+            )
+        )
+        viewModel.multiAddrParameter.onNext(testXPub)
+
+        Mockito.verify(errorUiWidgetVisibilityObserver).onChanged(true)
+        Assert.assertTrue(viewModel.errorUiWidgetVisible.value!!)
+    }
+
+    @Test
+    fun errorDialogTriggeredOnlyOnceWhenErrorOccursAfterSuccess() {
+        Mockito.`when`(getWalletInfoUseCase.execute(testXPub)).thenReturn(
+            Observable.just(
+                Result.Success(wallet_with_transactions), Result.Error(java.lang.Exception())
+            )
+        )
+        Mockito.`when`(resourceFacade.getString(R.string.common_error_message))
+            .thenReturn("Oups! Something went wrong. You can pull to refresh to retry!")
+
+        viewModel.multiAddrParameter.onNext(testXPub)
+
+        Mockito.verify(errorDialogObserver).onChanged("Oups! Something went wrong. You can pull to refresh to retry!")
+
+        Mockito.verifyNoMoreInteractions(errorDialogObserver)
+    }
+
+    @Test
+    fun errorDialogTriggeredForMultipleSubscribes() {
+        Mockito.`when`(getWalletInfoUseCase.execute(testXPub)).thenReturn(
+            Observable.just(
+                Result.Success(wallet_with_transactions), Result.Error(java.lang.Exception())
+            )
+        )
+        Mockito.`when`(resourceFacade.getString(R.string.common_error_message))
+            .thenReturn("Oups! Something went wrong. You can pull to refresh to retry!")
+
+        viewModel.multiAddrParameter.onNext(testXPub)
+
+        Mockito.verify(errorDialogObserver).onChanged("Oups! Something went wrong. You can pull to refresh to retry!")
+    }
+
+    @Test
+    fun resultIsReturnedAfterRetrying() {
+        Mockito.`when`(getWalletInfoUseCase.execute(testXPub)).thenReturn(
+            Observable.just(
+                Result.Error(java.lang.Exception())
+            )
+        )
+
+        viewModel.multiAddrParameter.onNext(testXPub)
+        Mockito.verify(transactionItemsObserver, Mockito.never()).onChanged(Mockito.anyList())
+
+        Mockito.`when`(getWalletInfoUseCase.execute(testXPub)).thenReturn(
+            Observable.just(
+                Result.Success(wallet_with_transactions)
+            )
+        )
+
+        viewModel.retryTriggered.onNext(Unit)
+
+        Mockito.verify(transactionItemsObserver)
+            .onChanged(wallet_with_transactions.transactionItems.map {
+                TransactionItemViewModel(it)
+            })
+        Mockito.verify(balanceObserver).onChanged(wallet_with_transactions.balance)
+
     }
 }

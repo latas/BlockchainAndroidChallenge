@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.blockchain.btctransactions.R
 import com.blockchain.btctransactions.core.data.ResourceFacade
 import com.blockchain.btctransactions.core.data.Result
+import com.blockchain.btctransactions.core.ui.UiErrorState
 import com.blockchain.btctransactions.core.utils.*
 import com.blockchain.btctransactions.data.TransactionItem
 import com.blockchain.btctransactions.data.Wallet
@@ -16,7 +17,6 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.withLatestFrom
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
-import java.lang.Error
 import javax.inject.Inject
 
 class TransactionsViewModel @Inject constructor(
@@ -29,12 +29,27 @@ class TransactionsViewModel @Inject constructor(
 
     //input
     val multiAddrParameter: BehaviorSubject<String> = BehaviorSubject.create<String>()
+    val retryTriggered: PublishSubject<Unit> = PublishSubject.create<Unit>()
     val pullToRefreshTriggered: PublishSubject<Unit> = PublishSubject.create<Unit>()
+
+    private val pullToRefreshTriggeredObservable =
+        pullToRefreshTriggered.withLatestFrom(multiAddrParameter).map { (_, parameter) ->
+            parameter to false
+        }
+
+    private val retryTriggeredObservable =
+        retryTriggered.withLatestFrom(multiAddrParameter).map { (_, parameter) ->
+            parameter to true
+        }
+
+    private val multiAddressInputObservable = multiAddrParameter.distinct().map { parameter ->
+        parameter to true
+    }
 
     //outputs
     val balance: LiveData<String> = Transformations.map(wallet) { resource ->
         when (resource) {
-            is Result.Success -> resource.data.balance.toString()
+            is Result.Success -> resource.data.balance
             else -> String()
         }
     }
@@ -42,6 +57,7 @@ class TransactionsViewModel @Inject constructor(
     val loading: LiveData<Boolean> = Transformations.map(wallet) { resource ->
         resource.isLoading
     }
+
     val pullToRefreshEnabled: LiveData<Boolean> = Transformations.map(loading) {
         it.not()
     }
@@ -59,47 +75,36 @@ class TransactionsViewModel @Inject constructor(
         it.map { item -> TransactionItemViewModel(item) }
     }
 
-    //we want to show the error ui only when an error occurs and the list is empty otherwise show an alert dialog
-    val errorUiVisible = Transformations.map(wallet.merge(transactionItems)) { (result, items) ->
+    private val uiState = Transformations.map(wallet.merge(transactionItems)) { (result, items) ->
         when (result) {
-            is Error -> items?.isEmpty() ?: true
-            else -> false
+            is Result.Error -> if (items.isNullOrEmpty()) UiErrorState.JUST_ERROR else UiErrorState.ERROR_WITH_DATA
+            else -> UiErrorState.NO_ERROR
         }
     }
 
-    val errorDialog: LiveData<String> = Transformations.map(wallet.merge(transactionItems)) { (result, items) ->
-        when (result) {
-            is Error -> if (items?.isEmpty() == true) resourceFacade.getString(R.string.common_error_message) else null
-            else -> null
-        }
-    }.filterNulls().single()
 
-
-    private val pullToRefreshObservable =
-        pullToRefreshTriggered.withLatestFrom(multiAddrParameter).map { (_, parameter) ->
-            parameter to false
-        }
-
-    private val multiAddressInputObservable = multiAddrParameter.distinct().map { parameter ->
-        parameter to true
+    val errorUiWidgetVisible: LiveData<Boolean> = Transformations.map(uiState) {
+        it == UiErrorState.JUST_ERROR
     }
+
+    val showErrorDialog: LiveData<String> = Transformations.map(uiState.filter { it == UiErrorState.ERROR_WITH_DATA }) {
+        resourceFacade.getString(R.string.common_error_message)
+    }.single()
+
 
     init {
-        multiAddressInputObservable.mergeWith(pullToRefreshObservable).switchMap { (parameter, showLoading) ->
-            getWalletUseCase.execute(parameter).filter {
-                if (!showLoading) {
-                    !it.isLoading
-                } else {
-                    true
+        multiAddressInputObservable.mergeWith(pullToRefreshTriggeredObservable).mergeWith(retryTriggeredObservable)
+            .switchMap { (parameter, showLoading) ->
+                getWalletUseCase.execute(parameter).filter {
+                    if (!showLoading) {
+                        !it.isLoading
+                    } else {
+                        true
+                    }
                 }
-            }
-        }.subscribe {
-            wallet.postValue(it)
-        }.addTo(bag)
-    }
-
-    fun retry() {
-
+            }.subscribe {
+                wallet.postValue(it)
+            }.addTo(bag)
     }
 
     override fun onCleared() {

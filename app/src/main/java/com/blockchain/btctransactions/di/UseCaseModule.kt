@@ -7,10 +7,8 @@ import dagger.Provides
 
 @Module
 class UseCaseModule {
-
     @Provides
     fun providesGetWalletsUseCase(): GetWalletInfoUseCase =
             GetWallet()
-
 
 }

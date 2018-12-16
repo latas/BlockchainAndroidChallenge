@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.blockchain.btctransactions.R
 import com.blockchain.btctransactions.databinding.FragmentTransactionsBinding
@@ -38,10 +39,18 @@ class TransactionsFragment : Fragment() {
             it.setLifecycleOwner(this)
         }
 
+        binding.btnRetry.setOnClickListener {
+            viewModel.retryTriggered.onNext(Unit)
+        }
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        viewModel.showErrorDialog.observe(this, Observer {
+            //show dialog with the message
+        })
     }
 }

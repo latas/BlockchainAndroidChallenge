@@ -14,7 +14,6 @@ open class SingleLiveEvent<T> : MediatorLiveData<T>() {
     override fun observe(owner: LifecycleOwner, observer: Observer<in T>) {
         // Observe the internal MutableLiveData
         super.observe(owner, Observer<T> { t ->
-            if (t == null) return@Observer
 
             if (mPending.compareAndSet(true, false)) {
                 observer.onChanged(t)

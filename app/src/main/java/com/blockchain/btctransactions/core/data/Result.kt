@@ -1,7 +1,5 @@
 package com.blockchain.btctransactions.core.data
 
-import java.lang.Error
-
 sealed class Result<out T : Any> {
 
     data class Success<out T : Any>(val data: T) : Result<T>()
