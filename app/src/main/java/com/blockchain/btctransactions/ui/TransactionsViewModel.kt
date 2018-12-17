@@ -75,7 +75,7 @@ class TransactionsViewModel @Inject constructor(
         it.map { item -> TransactionItemViewModel(item) }
     }
 
-    private val uiState = Transformations.map(wallet.merge(transactionItems)) { (result, items) ->
+    private val uiErrorState = Transformations.map(wallet.merge(transactionItems)) { (result, items) ->
         when (result) {
             is Result.Error -> if (items.isNullOrEmpty()) UiErrorState.JUST_ERROR else UiErrorState.ERROR_WITH_DATA
             else -> UiErrorState.NO_ERROR
@@ -83,11 +83,11 @@ class TransactionsViewModel @Inject constructor(
     }
 
 
-    val errorUiWidgetVisible: LiveData<Boolean> = Transformations.map(uiState) {
+    val errorUiWidgetVisible: LiveData<Boolean> = Transformations.map(uiErrorState) {
         it == UiErrorState.JUST_ERROR
     }
 
-    val showErrorDialog: LiveData<String> = Transformations.map(uiState.filter { it == UiErrorState.ERROR_WITH_DATA }) {
+    val showErrorDialog: LiveData<String> = Transformations.map(uiErrorState.filter { it == UiErrorState.ERROR_WITH_DATA }) {
         resourceFacade.getString(R.string.common_error_message)
     }.single()
 

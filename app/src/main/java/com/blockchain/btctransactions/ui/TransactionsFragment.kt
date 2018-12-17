@@ -1,5 +1,6 @@
 package com.blockchain.btctransactions.ui
 
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,6 +15,7 @@ import com.blockchain.btctransactions.databinding.FragmentTransactionsBinding
 import com.blockchain.btctransactions.viewmodel.AppViewModelFactory
 import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
+
 
 class TransactionsFragment : Fragment() {
 
@@ -50,7 +52,13 @@ class TransactionsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel.showErrorDialog.observe(this, Observer {
-            //show dialog with the message
+            val alertDialog = AlertDialog.Builder(activity).create()
+            alertDialog.setTitle("Alert")
+            alertDialog.setMessage(it)
+            alertDialog.setButton(
+                AlertDialog.BUTTON_POSITIVE, "OK"
+            ) { dialog, _ -> dialog.dismiss() }
+            alertDialog.show()
         })
     }
 }

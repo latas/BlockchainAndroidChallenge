@@ -1,6 +1,8 @@
 package com.blockchain.btctransactions
 
 import com.blockchain.btctransactions.data.*
+import com.google.gson.Gson
+import okio.Okio
 
 val testXPub =
     "xpub6CfLQa8fLgtouvLxrb8EtvjbXfoC1yqzH6YbTJw4dP7srt523AhcMV8Uh4K3TWSHz9oDWmn9MuJogzdGU3ncxkBsAC9wFBLmFrWT9Ek81kQ"
@@ -33,3 +35,14 @@ val wallet_with_transactions = wallet {
     }
 
 }
+
+object TestData {
+    val multiAddressData: MultiAddressData
+        get() {
+            val inputStream = javaClass.classLoader
+                .getResourceAsStream("api-response/multiaddress_sample_response.json")
+            val source = Okio.buffer(Okio.source(inputStream))
+            return Gson().fromJson(source.readString(Charsets.UTF_8), MultiAddressData::class.java)
+        }
+}
+

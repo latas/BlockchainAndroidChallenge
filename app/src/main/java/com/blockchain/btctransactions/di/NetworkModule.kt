@@ -6,15 +6,10 @@ import com.blockchain.btctransactions.di.qualifiers.BaseUrl
 import com.blockchain.btctransactions.di.scopes.PerApplication
 import dagger.Module
 import dagger.Provides
-import io.reactivex.Flowable
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
-import javax.inject.Named
-import javax.inject.Provider
-import javax.inject.Singleton
 
 @Module
 class NetworkModule {

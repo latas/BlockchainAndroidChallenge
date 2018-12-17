@@ -15,6 +15,7 @@ class MultiAddressApiTest : ApiTest() {
         mSubscriber.assertNoErrors()
         mSubscriber.assertComplete()
         mSubscriber.assertValueCount(1)
+        //we can also do it==TestData.multiAddressData
         mSubscriber.assertValueAt(0) {
             it.wallet.finalBalance == 621236.toDouble() &&
                     it.addresses.size == 1 &&
@@ -39,7 +40,7 @@ class MultiAddressApiTest : ApiTest() {
             it is HttpException &&
                     it.code() == 500
         }
-        mSubscriber.awaitTerminalEvent()
+
         mSubscriber.assertTerminated()
         mSubscriber.assertNotComplete()
         mSubscriber.assertNoValues()
@@ -49,7 +50,7 @@ class MultiAddressApiTest : ApiTest() {
     fun getMultiAddressServiceWithSocketTimeoutError() {
         enqueueResponse("multiaddress_sample_response.json", responseCode = 200, noResponse = true)
         val mSubscriber = service.multiAddress(Mockito.anyString()).test()
-        mSubscriber.awaitTerminalEvent(2, TimeUnit.SECONDS)
+        mSubscriber.awaitTerminalEvent(1, TimeUnit.SECONDS)
         mSubscriber.assertError {
             it is SocketTimeoutException
         }
