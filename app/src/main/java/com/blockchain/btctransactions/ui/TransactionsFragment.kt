@@ -43,10 +43,10 @@ class TransactionsFragment : Fragment() {
         }
 
         binding.btnRetry.setOnClickListener {
-            viewModel.retryTriggered.onNext(Unit)
+            viewModel.dataRefreshRequested.onNext(Unit)
         }
         binding.swipeContainer.setOnRefreshListener {
-            viewModel.pullToRefreshTriggered.onNext(Unit)
+            viewModel.dataRefreshRequested.onNext(Unit)
         }
         return binding.root
     }
@@ -63,7 +63,5 @@ class TransactionsFragment : Fragment() {
             ) { dialog, _ -> dialog.dismiss() }
             alertDialog.show()
         })
-
-
     }
 }

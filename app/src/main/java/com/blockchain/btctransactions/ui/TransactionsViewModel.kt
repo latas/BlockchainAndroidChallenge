@@ -30,26 +30,11 @@ class TransactionsViewModel @Inject constructor(
     //input
     val isPullToRefreshing = MutableLiveData<Boolean>()
 
-    val multiAddrParameter: BehaviorSubject<String> = BehaviorSubject.create<String>()
-    val retryTriggered: PublishSubject<Unit> = PublishSubject.create<Unit>()
-    val pullToRefreshTriggered: PublishSubject<Unit> = PublishSubject.create<Unit>()
+    val viewLoadTriggered: BehaviorSubject<Unit> = BehaviorSubject.create<Unit>()
+    val dataRefreshRequested: PublishSubject<Unit> = PublishSubject.create<Unit>()
 
-    private val pullToRefreshTriggeredObservable =
-        pullToRefreshTriggered.withLatestFrom(multiAddrParameter).map { (_, parameter) ->
-            parameter
-        }
-
-    private val retryTriggeredObservable =
-        retryTriggered.withLatestFrom(multiAddrParameter).map { (_, parameter) ->
-            parameter
-        }
-
-    private val multiAddressInputObservable = multiAddrParameter.distinct().map { parameter ->
-        parameter
-    }
-
-    private val input =
-        multiAddressInputObservable.mergeWith(pullToRefreshTriggeredObservable).mergeWith(retryTriggeredObservable)
+    private val dataRequestInput =
+        viewLoadTriggered.distinct().mergeWith(dataRefreshRequested)
 
     //outputs
 
@@ -104,8 +89,8 @@ class TransactionsViewModel @Inject constructor(
         }.single()
 
     init {
-        input.switchMap { parameter ->
-            getWalletUseCase.execute(parameter)
+        dataRequestInput.switchMap {
+            getWalletUseCase.execute()
         }.subscribe {
             wallet.postValue(it)
         }.addTo(bag)

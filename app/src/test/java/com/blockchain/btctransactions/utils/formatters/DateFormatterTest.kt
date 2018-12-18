@@ -1,5 +1,6 @@
 package com.blockchain.btctransactions.utils.formatters
 
+import com.blockchain.btctransactions.R
 import com.blockchain.btctransactions.core.data.ResourceFacade
 import com.blockchain.btctransactions.core.utils.formatters.DateFormatter
 import org.junit.Assert
@@ -28,9 +29,15 @@ class DateFormatterTest {
 
     @Test
     fun formattedRightTodaysDate() {
-        Assert.assertEquals("Today ${localTime()}", with(dateFormatter) {
-            Instant.now().epochSecond.toLocalDateTime()
-        })
+        val date = Date()
+        Mockito.`when`(resourceFacade.getString(R.string.today_with_time, localTimeForDate(date)))
+            .thenReturn("Today ${localTimeForDate(date)}")
+
+        Assert.assertEquals(
+            "Today ${localTimeForDate(date)}",
+            with(dateFormatter) {
+                date.time.div(1000).toLocalDateTime()
+            })
     }
 
     //This will fail if the device date is set to 2018-11-18
@@ -41,9 +48,9 @@ class DateFormatterTest {
         })
     }
 
-    private fun localTime(): String {
+    private fun localTimeForDate(date: Date): String {
         val outputFormat = SimpleDateFormat("HH:mm:ss")
-        return outputFormat.format(Date())
+        return outputFormat.format(date)
     }
 
 }

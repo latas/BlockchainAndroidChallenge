@@ -14,6 +14,7 @@ import dagger.android.AndroidInjectionModule
         ActivityModule::class,
         NetworkModule::class,
         FormattersModule::class,
+        SecurityModule::class,
         SchedulersModule::class,
         ViewModelModule::class
     ]
