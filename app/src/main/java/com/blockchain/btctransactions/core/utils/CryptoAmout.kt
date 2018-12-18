@@ -1,22 +1,14 @@
+import com.blockchain.btctransactions.core.utils.MeasureUnit
 import kotlin.math.pow
 
-interface CryptoUnit {
 
-    val factor: Double
-
-    fun <T : CryptoUnit> convertTo(otherUnit: T): Double {
-        return factor / otherUnit.factor
-    }
-}
-
-class CryptoAmount<out T : CryptoUnit>(val value: Double, private val unitInstance: () -> T) {
+class CryptoAmount<out T : MeasureUnit>(val value: Double, private val unitInstance: () -> T) {
 
     companion object {
-        inline operator fun <reified U : CryptoUnit> invoke(value: Double) = CryptoAmount(value) {
+        inline operator fun <reified U : MeasureUnit> invoke(value: Double) = CryptoAmount(value) {
             U::class.java.newInstance()
         }
     }
-
 
     val toBitcoin: CryptoAmount<Bitcoin>
         get() = convert()
@@ -24,18 +16,18 @@ class CryptoAmount<out T : CryptoUnit>(val value: Double, private val unitInstan
     val toSatoshis: CryptoAmount<Satoshis>
         get() = convert()
 
-    private inline fun <reified U : CryptoUnit> convert(): CryptoAmount<U> {
+    private inline fun <reified U : MeasureUnit> convert(): CryptoAmount<U> {
         val newUnitInstance = U::class.java.newInstance()
         return CryptoAmount(value * unitInstance().convertTo(newUnitInstance))
     }
 }
 
-class Satoshis : CryptoUnit {
+class Satoshis : MeasureUnit {
     override val factor = 1.0
 
 }
 
-class Bitcoin : CryptoUnit {
+class Bitcoin : MeasureUnit {
     override val factor = Math.E.pow(8)
 }
 

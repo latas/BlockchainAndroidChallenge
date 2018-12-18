@@ -2,6 +2,8 @@ package com.blockchain.btctransactions.core.utils.formatters
 
 import com.blockchain.btctransactions.R
 import com.blockchain.btctransactions.core.data.ResourceFacade
+import com.blockchain.btctransactions.core.utils.Second
+import com.blockchain.btctransactions.core.utils.TimeInterval
 import org.threeten.bp.*
 import org.threeten.bp.format.DateTimeFormatter
 import javax.inject.Inject
@@ -9,8 +11,8 @@ import javax.inject.Inject
 
 class DateFormatter @Inject constructor(private val resourceFacade: ResourceFacade) {
 
-    fun Long.toLocalDateTime(): String? {
-        val transactionDate = LocalDateTime.ofEpochSecond(this, 0, ZoneOffset.UTC)
+    fun TimeInterval<Second>.toLocalDateTime(): String? {
+        val transactionDate = LocalDateTime.ofEpochSecond(this.value.toLong(), 0, ZoneOffset.UTC)
 
         return if (transactionDate.isToday()) {
             resourceFacade.getString(

@@ -5,7 +5,7 @@ import org.junit.Assert
 import org.junit.Test
 import satoshis
 
-class CryptoUnitsTest {
+class CryptoAmountTest {
 
     @Test
     fun oneSatoshisToBitcoin() {

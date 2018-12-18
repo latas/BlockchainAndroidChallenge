@@ -3,6 +3,8 @@ package com.blockchain.btctransactions.utils.formatters
 import com.blockchain.btctransactions.R
 import com.blockchain.btctransactions.core.data.ResourceFacade
 import com.blockchain.btctransactions.core.utils.formatters.DateFormatter
+import com.blockchain.btctransactions.core.utils.milliseconds
+import com.blockchain.btctransactions.core.utils.seconds
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -36,7 +38,7 @@ class DateFormatterTest {
         Assert.assertEquals(
             "Today ${localTimeForDate(date)}",
             with(dateFormatter) {
-                date.time.div(1000).toLocalDateTime()
+                date.time.milliseconds.toSeconds.toLocalDateTime()
             })
     }
 
@@ -44,7 +46,7 @@ class DateFormatterTest {
     @Test
     fun formattedRightRandomDate() {
         Assert.assertEquals("2018-11-18 10:33:53", with(dateFormatter) {
-            1542537233L.toLocalDateTime()
+            1542537233.seconds.toLocalDateTime()
         })
     }
 
