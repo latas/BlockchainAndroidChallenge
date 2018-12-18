@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.blockchain.btctransactions.R
+import com.blockchain.btctransactions.core.ui.setVisibility
 import com.blockchain.btctransactions.databinding.FragmentTransactionsBinding
 import com.blockchain.btctransactions.viewmodel.AppViewModelFactory
 import dagger.android.support.AndroidSupportInjection
@@ -44,7 +45,9 @@ class TransactionsFragment : Fragment() {
         binding.btnRetry.setOnClickListener {
             viewModel.retryTriggered.onNext(Unit)
         }
-
+        binding.swipeContainer.setOnRefreshListener {
+            viewModel.pullToRefreshTriggered.onNext(Unit)
+        }
         return binding.root
     }
 
@@ -60,5 +63,7 @@ class TransactionsFragment : Fragment() {
             ) { dialog, _ -> dialog.dismiss() }
             alertDialog.show()
         })
+
+
     }
 }

@@ -27,7 +27,7 @@ class TransactionsViewModelTest {
     @Mock
     private lateinit var balanceObserver: Observer<String>
     @Mock
-    private lateinit var loadingObserver: Observer<Boolean>
+    private lateinit var showLoadingObserver: Observer<Boolean>
     @Mock
     private lateinit var resourceFacade: ResourceFacade
     @Mock
@@ -52,7 +52,7 @@ class TransactionsViewModelTest {
         MockitoAnnotations.initMocks(this)
         viewModel = TransactionsViewModel(getWalletInfoUseCase, resourceFacade)
         viewModel.balance.observeForever(balanceObserver)
-        viewModel.loading.observeForever(loadingObserver)
+        viewModel.showLoader.observeForever(showLoadingObserver)
         viewModel.pullToRefreshEnabled.observeForever(pullToRefreshEnabledObserver)
         viewModel.refreshStopped.observeForever(refreshStopObserver)
         viewModel.transactionItemsViewModel.observeForever(transactionItemsObserver)
@@ -120,9 +120,9 @@ class TransactionsViewModelTest {
         )
         viewModel.multiAddrParameter.onNext(testXPub)
 
-        Mockito.verify(loadingObserver)
+        Mockito.verify(showLoadingObserver)
             .onChanged(true)
-        Mockito.verifyNoMoreInteractions(loadingObserver)
+        Mockito.verifyNoMoreInteractions(showLoadingObserver)
     }
 
     @Test
@@ -133,12 +133,12 @@ class TransactionsViewModelTest {
             )
         )
         viewModel.multiAddrParameter.onNext(testXPub)
-        Mockito.verify(loadingObserver)
+        Mockito.verify(showLoadingObserver)
             .onChanged(true)
-        Mockito.verify(loadingObserver)
+        Mockito.verify(showLoadingObserver)
             .onChanged(false)
 
-        Assert.assertFalse(viewModel.loading.value!!)
+        Assert.assertFalse(viewModel.showLoader.value!!)
     }
 
     @Test
@@ -172,7 +172,7 @@ class TransactionsViewModelTest {
 
 
     @Test
-    fun loadingIsChangedOnceWhenAddrParameterGivenAndPulltoRefreshTriggered() {
+    fun showLoaderIsFalseWhenAddrParameterGivenAndPulltoRefreshTriggered() {
         Mockito.`when`(getWalletInfoUseCase.execute(testXPub)).thenReturn(
             Observable.just(
                 Result.Loading
@@ -181,9 +181,10 @@ class TransactionsViewModelTest {
 
         viewModel.multiAddrParameter.onNext(testXPub)
         viewModel.pullToRefreshTriggered.onNext(Unit)
+        viewModel.isPullToRefreshing.value = true
 
         Mockito.verify(getWalletInfoUseCase, Mockito.times(2)).execute(testXPub)
-        Mockito.verify(loadingObserver).onChanged(true)
+        Assert.assertFalse(viewModel.showLoader.value!!)
     }
 
     @Test

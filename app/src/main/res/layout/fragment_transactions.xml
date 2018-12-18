@@ -27,13 +27,14 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
 
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        <com.blockchain.btctransactions.core.ui.SwipeRefreshLayoutWithStateListener
                 android:id="@+id/swipeContainer"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:enabled="@{viewModel.pullToRefreshEnabled}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:refresh="@={viewModel.isPullToRefreshing}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tv_balance"
                 app:stopRefresh="@{viewModel.refreshStopped}">
@@ -43,11 +44,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:overScrollMode="never"/>
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        </com.blockchain.btctransactions.core.ui.SwipeRefreshLayoutWithStateListener>
 
         <ProgressBar
-                app:visibility="@{viewModel.loading}"
+                android:id="@+id/loading_progress"
                 android:layout_width="wrap_content"
+                app:visibility="@{viewModel.showLoader}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

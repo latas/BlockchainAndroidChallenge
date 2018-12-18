@@ -28,25 +28,35 @@ class TransactionsViewModel @Inject constructor(
     private val wallet = MutableLiveData<Result<Wallet>>()
 
     //input
+    val isPullToRefreshing = MutableLiveData<Boolean>()
+
     val multiAddrParameter: BehaviorSubject<String> = BehaviorSubject.create<String>()
     val retryTriggered: PublishSubject<Unit> = PublishSubject.create<Unit>()
     val pullToRefreshTriggered: PublishSubject<Unit> = PublishSubject.create<Unit>()
 
     private val pullToRefreshTriggeredObservable =
         pullToRefreshTriggered.withLatestFrom(multiAddrParameter).map { (_, parameter) ->
-            parameter to false
+            parameter
         }
 
     private val retryTriggeredObservable =
         retryTriggered.withLatestFrom(multiAddrParameter).map { (_, parameter) ->
-            parameter to true
+            parameter
         }
 
     private val multiAddressInputObservable = multiAddrParameter.distinct().map { parameter ->
-        parameter to true
+        parameter
     }
 
+    private val input =
+        multiAddressInputObservable.mergeWith(pullToRefreshTriggeredObservable).mergeWith(retryTriggeredObservable)
+
     //outputs
+
+    private val loading: LiveData<Boolean> = Transformations.map(wallet) { resource ->
+        resource.isLoading
+    }
+
     val balance: LiveData<String> = Transformations.map(wallet) { resource ->
         when (resource) {
             is Result.Success -> resource.data.balance
@@ -54,9 +64,10 @@ class TransactionsViewModel @Inject constructor(
         }
     }
 
-    val loading: LiveData<Boolean> = Transformations.map(wallet) { resource ->
-        resource.isLoading
+    val showLoader = Transformations.map(isPullToRefreshing.merge(loading)) { (isPullToRefreshing, isLoading) ->
+        isLoading == true && !(isPullToRefreshing ?: false)
     }
+
 
     val pullToRefreshEnabled: LiveData<Boolean> = Transformations.map(loading) {
         it.not()
@@ -87,23 +98,17 @@ class TransactionsViewModel @Inject constructor(
         it == UiErrorState.JUST_ERROR
     }
 
-    val showErrorDialog: LiveData<String> = Transformations.map(uiErrorState.filter { it == UiErrorState.ERROR_WITH_DATA }) {
-        resourceFacade.getString(R.string.common_error_message)
-    }.single()
+    val showErrorDialog: LiveData<String> =
+        Transformations.map(uiErrorState.filter { it == UiErrorState.ERROR_WITH_DATA }) {
+            resourceFacade.getString(R.string.common_error_message)
+        }.single()
 
     init {
-        multiAddressInputObservable.mergeWith(pullToRefreshTriggeredObservable).mergeWith(retryTriggeredObservable)
-            .switchMap { (parameter, showLoading) ->
-                getWalletUseCase.execute(parameter).filter {
-                    if (!showLoading) {
-                        !it.isLoading
-                    } else {
-                        true
-                    }
-                }
-            }.subscribe {
-                wallet.postValue(it)
-            }.addTo(bag)
+        input.switchMap { parameter ->
+            getWalletUseCase.execute(parameter)
+        }.subscribe {
+            wallet.postValue(it)
+        }.addTo(bag)
     }
 
     override fun onCleared() {
