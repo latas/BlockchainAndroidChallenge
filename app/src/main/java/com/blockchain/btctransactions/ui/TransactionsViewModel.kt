@@ -14,7 +14,6 @@ import com.blockchain.btctransactions.data.Wallet
 import com.blockchain.btctransactions.domain.GetWalletInfoUseCase
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.withLatestFrom
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject

@@ -1,6 +1,7 @@
 package com.blockchain.btctransactions.domain
 
 import com.blockchain.btctransactions.core.data.Result
+import com.blockchain.btctransactions.core.schedulers.BaseSchedulerProvider
 import com.blockchain.btctransactions.core.utils.formatters.DateFormatter
 import com.blockchain.btctransactions.core.utils.formatters.NumberFormatter
 import com.blockchain.btctransactions.core.utils.seconds
@@ -19,7 +20,8 @@ class GetWalletInfoUseCase @Inject constructor(
     @Xpub private val xpub: String,
     private val repository: AddressRepository,
     private val dateFormatter: DateFormatter,
-    private val numberFormatter: NumberFormatter
+    private val numberFormatter: NumberFormatter,
+    private val baseSchedulerProvider: BaseSchedulerProvider
 ) {
     fun execute(): Observable<Result<Wallet>> =
         repository.getAddresses(xpub).map {
@@ -31,22 +33,33 @@ class GetWalletInfoUseCase @Inject constructor(
                 is Result.Error -> it
 
             }
-        }
+        }.onErrorReturn {
+            Result.Error(it)
+        }.observeOn(baseSchedulerProvider.io())
+            .subscribeOn(baseSchedulerProvider.ui())
 
     private fun composeWallet(data: MultiAddressData): Wallet {
         return wallet {
-            balance = data.wallet.balance.bitcoin()
+            balance = with(numberFormatter) {
+                data.wallet.balance.bitcoin().roundToFractionDigits(8)
+            }
             data.transactions.map { transactionData ->
                 transaction {
-                    amount = transactionData.result.bitcoin()
+                    amount = with(numberFormatter) {
+                        transactionData.result.bitcoin().roundToFractionDigits(8)
+                    }
+                    transactionData.result.bitcoin()
                     type = if (transactionData.result >= 0) TransactionType.INCOMING else TransactionType.OUTGOING
                     date = with(dateFormatter) {
                         transactionData.time.seconds.toLocalDateTime()
                     }
                     hash = transactionData.hash
-                    fee = transactionData.fee.bitcoin()
-
-                    transactionData.outputs.map {
+                    fee = with(numberFormatter) {
+                        transactionData.fee.bitcoin().roundToFractionDigits(8)
+                    }
+                    transactionData.outputs.filter {
+                        xpub != it.xPub?.key
+                    }.map {
                         address(it.address)
                     }
                 }
@@ -54,8 +67,6 @@ class GetWalletInfoUseCase @Inject constructor(
         }
     }
 
-    private fun Double.bitcoin(): String =
-        with(numberFormatter) {
-            this@bitcoin.satoshis.toBitcoin.value.absoluteValue.roundToFractionDigits(8)
-        }
+    private fun Double.bitcoin(): Double =
+        satoshis.toBitcoin.value.absoluteValue
 }

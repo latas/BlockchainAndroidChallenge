@@ -46,8 +46,11 @@ class TransactionBuilder {
     lateinit var date: String
     lateinit var fee: String
 
-    fun address(address: String, setup: AddressBuilder.() -> Unit = {}) =
-        AddressBuilder(address).apply(setup).build()
+    fun address(address: String, setup: AddressBuilder.() -> Unit = {}){
+        val builder = AddressBuilder(address).apply(setup)
+        addresses += builder.build()
+    }
+
 
     fun build(): TransactionItem {
         return TransactionItem(hash = hash, type = type, date = date, addresses = addresses, amount = amount, fee = fee)

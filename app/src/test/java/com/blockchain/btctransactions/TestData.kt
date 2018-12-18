@@ -18,6 +18,7 @@ val wallet_with_transactions = wallet {
         hash = "cxzcwepowlfj"
         type = TransactionType.INCOMING
         date = "23/2/2018"
+        fee = "12.214432"
         address("adgaksldgsdafasfdoagdjpaudsgwaiu")
         address("adgaksldsrwsfgoagdjpauds[ g[wai")
         address("adgaksldgoagdjpauds[ g[wai")
@@ -29,6 +30,7 @@ val wallet_with_transactions = wallet {
         hash = "cxzcwepowlfj"
         type = TransactionType.INCOMING
         date = "23/2/2018"
+        fee = "12.214432"
         address("adgaksldgoagdjpauds[ g[wai")
         address("adgaksldgoagdjpauds[ g[wai")
         address("adgaksldgoagdjpauds[ g[wai")

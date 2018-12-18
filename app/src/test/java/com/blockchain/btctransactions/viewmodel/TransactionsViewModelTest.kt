@@ -6,7 +6,6 @@ import com.blockchain.btctransactions.R
 import com.blockchain.btctransactions.core.data.ResourceFacade
 import com.blockchain.btctransactions.core.data.Result
 import com.blockchain.btctransactions.domain.GetWalletInfoUseCase
-import com.blockchain.btctransactions.testXPub
 import com.blockchain.btctransactions.ui.TransactionItemViewModel
 import com.blockchain.btctransactions.ui.TransactionsViewModel
 import com.blockchain.btctransactions.wallet_with_no_transactions
@@ -156,20 +155,6 @@ class TransactionsViewModelTest {
         Mockito.verify(getWalletInfoUseCase).execute()
         Mockito.verifyNoMoreInteractions(getWalletInfoUseCase)
     }
-
-    @Test
-    fun nothingHappensWhenPulltoRefreshTriggeredWithoutInput() {
-        Mockito.`when`(getWalletInfoUseCase.execute()).thenReturn(
-            Observable.just(
-                Result.Loading, Result.Success(wallet_with_no_transactions)
-            )
-        )
-
-        viewModel.viewLoadTriggered.onNext(Unit)
-
-        Mockito.verify(getWalletInfoUseCase, Mockito.never()).execute()
-    }
-
 
     @Test
     fun showLoaderIsFalseWhenAddrParameterGivenAndPulltoRefreshTriggered() {
