@@ -63,5 +63,6 @@ class TransactionsFragment : Fragment() {
             ) { dialog, _ -> dialog.dismiss() }
             alertDialog.show()
         })
+        viewModel.viewLoadTriggered.onNext(Unit)
     }
 }

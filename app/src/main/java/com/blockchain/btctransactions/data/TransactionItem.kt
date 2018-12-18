@@ -5,6 +5,7 @@ data class TransactionItem(
     val date: String,
     val addresses: List<String>,
     val amount: String,
+    val fee: String,
     val type: TransactionType
 )
 
@@ -12,11 +13,9 @@ data class TransactionItem(
 annotation class WalletDsl
 
 @WalletDsl
-fun wallet(setup: WalletBuilder.() -> Unit): Wallet {
-    val walletBuilder = WalletBuilder()
-    walletBuilder.setup()
-    return walletBuilder.build()
-}
+fun wallet(setup: WalletBuilder.() -> Unit): Wallet =
+    WalletBuilder().apply(setup).build()
+
 
 @WalletDsl
 class WalletBuilder {
@@ -28,9 +27,8 @@ class WalletBuilder {
     }
 
     fun transaction(setup: TransactionBuilder.() -> Unit = {}) {
-        val houseBuilder = TransactionBuilder()
-        houseBuilder.setup()
-        transactions += houseBuilder.build()
+        val transactionBuilder = TransactionBuilder().apply(setup)
+        transactions += transactionBuilder.build()
     }
 
     fun build(): Wallet {
@@ -46,15 +44,13 @@ class TransactionBuilder {
     lateinit var type: TransactionType
     lateinit var hash: String
     lateinit var date: String
+    lateinit var fee: String
 
-    fun address(address: String, setup: AddressBuilder.() -> Unit = {}) {
-        val addressBuilder = AddressBuilder(address)
-        addressBuilder.setup()
-        addresses += addressBuilder.build()
-    }
+    fun address(address: String, setup: AddressBuilder.() -> Unit = {}) =
+        AddressBuilder(address).apply(setup).build()
 
     fun build(): TransactionItem {
-        return TransactionItem(hash, date, addresses, amount, type)
+        return TransactionItem(hash = hash, type = type, date = date, addresses = addresses, amount = amount, fee = fee)
     }
 
 }

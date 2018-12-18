@@ -17,7 +17,7 @@ class MultiAddressApiTest : ApiTest() {
         mSubscriber.assertValueCount(1)
         //we can also do it==TestData.multiAddressData
         mSubscriber.assertValueAt(0) {
-            it.wallet.finalBalance == 621236.toDouble() &&
+            it.wallet.balance == 621236.toDouble() &&
                     it.addresses.size == 1 &&
                     it.addresses[0].address ==
                     "xpub6CfLQa8fLgtouvLxrb8EtvjbXfoC1yqzH6YbTJw4dP7srt523AhcMV8Uh4K3TWSHz9oDWmn9MuJogzdGU3ncxkBsAC9wFBLmFrWT9Ek81kQ" &&

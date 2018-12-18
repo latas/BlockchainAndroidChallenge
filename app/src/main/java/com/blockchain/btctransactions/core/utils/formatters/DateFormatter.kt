@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 class DateFormatter @Inject constructor(private val resourceFacade: ResourceFacade) {
 
-    fun TimeInterval<Second>.toLocalDateTime(): String? {
+    fun TimeInterval<Second>.toLocalDateTime(): String {
         val transactionDate = LocalDateTime.ofEpochSecond(this.value.toLong(), 0, ZoneOffset.UTC)
 
         return if (transactionDate.isToday()) {

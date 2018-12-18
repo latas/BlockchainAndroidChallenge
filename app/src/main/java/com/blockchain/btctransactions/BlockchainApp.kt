@@ -3,6 +3,7 @@ package com.blockchain.btctransactions
 import android.app.Activity
 import android.app.Application
 import com.blockchain.btctransactions.di.DaggerAppComponent
+import com.jakewharton.threetenabp.AndroidThreeTen
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
@@ -21,5 +22,7 @@ class BlockchainApp : Application(), HasActivityInjector {
 
         DaggerAppComponent.builder().application(this)
             .build().inject(this)
+
+        AndroidThreeTen.init(this)
     }
 }

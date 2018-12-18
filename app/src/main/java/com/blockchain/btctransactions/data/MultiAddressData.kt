@@ -10,7 +10,7 @@ data class MultiAddressData(
 
 data class AddressData(val address: String)
 
-data class WalletData(@SerializedName("final_balance") val finalBalance: Double)
+data class WalletData(@SerializedName("final_balance") val balance: Double)
 
 
 data class TransactionData(

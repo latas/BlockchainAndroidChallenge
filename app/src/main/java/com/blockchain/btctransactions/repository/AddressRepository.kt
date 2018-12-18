@@ -6,9 +6,11 @@ import com.blockchain.btctransactions.core.schedulers.BaseSchedulerProvider
 import com.blockchain.btctransactions.core.utils.toResult
 import com.blockchain.btctransactions.core.utils.withLoading
 import com.blockchain.btctransactions.data.MultiAddressData
+import com.blockchain.btctransactions.di.scopes.PerApplication
 import io.reactivex.Observable
 import javax.inject.Inject
 
+@PerApplication
 class AddressRepository @Inject constructor(
     private val appService: AppService,
     private val schedulerProvider: BaseSchedulerProvider
