@@ -13,6 +13,7 @@ import dagger.android.AndroidInjectionModule
         AndroidInjectionModule::class,
         ActivityModule::class,
         NetworkModule::class,
+        FormattersModule::class,
         SchedulersModule::class,
         ViewModelModule::class
     ]

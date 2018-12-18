@@ -20,6 +20,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
+
 class TransactionsViewModelTest {
 
     @Mock
@@ -27,7 +28,7 @@ class TransactionsViewModelTest {
     @Mock
     private lateinit var balanceObserver: Observer<String>
     @Mock
-    private lateinit var showLoadingObserver: Observer<Boolean>
+    private lateinit var showLoaderObserver: Observer<Boolean>
     @Mock
     private lateinit var resourceFacade: ResourceFacade
     @Mock
@@ -52,7 +53,7 @@ class TransactionsViewModelTest {
         MockitoAnnotations.initMocks(this)
         viewModel = TransactionsViewModel(getWalletInfoUseCase, resourceFacade)
         viewModel.balance.observeForever(balanceObserver)
-        viewModel.showLoader.observeForever(showLoadingObserver)
+        viewModel.showLoader.observeForever(showLoaderObserver)
         viewModel.pullToRefreshEnabled.observeForever(pullToRefreshEnabledObserver)
         viewModel.refreshStopped.observeForever(refreshStopObserver)
         viewModel.transactionItemsViewModel.observeForever(transactionItemsObserver)
@@ -112,7 +113,7 @@ class TransactionsViewModelTest {
     }
 
     @Test
-    fun loadingIsTrueWhenLoadingReturned() {
+    fun showLoaderIsTrueWhenLoadingReturned() {
         Mockito.`when`(getWalletInfoUseCase.execute(testXPub)).thenReturn(
             Observable.just(
                 Result.Loading
@@ -120,25 +121,24 @@ class TransactionsViewModelTest {
         )
         viewModel.multiAddrParameter.onNext(testXPub)
 
-        Mockito.verify(showLoadingObserver)
+        Mockito.verify(showLoaderObserver)
             .onChanged(true)
-        Mockito.verifyNoMoreInteractions(showLoadingObserver)
+        Mockito.verifyNoMoreInteractions(showLoaderObserver)
     }
 
     @Test
-    fun loadingIsTrueAndThenFalseWhenSuccessAfterLoadingReturned() {
+    fun showLoaderIsTrueAndThenFalseWhenSuccessAfterLoadingReturned() {
         Mockito.`when`(getWalletInfoUseCase.execute(testXPub)).thenReturn(
             Observable.just(
                 Result.Loading, Result.Success(wallet_with_no_transactions)
             )
         )
         viewModel.multiAddrParameter.onNext(testXPub)
-        Mockito.verify(showLoadingObserver)
-            .onChanged(true)
-        Mockito.verify(showLoadingObserver)
-            .onChanged(false)
 
-        Assert.assertFalse(viewModel.showLoader.value!!)
+        val inOrder = Mockito.inOrder(showLoaderObserver)
+        inOrder.verify(showLoaderObserver).onChanged(true)
+        inOrder.verify(showLoaderObserver).onChanged(false)
+        Mockito.verifyNoMoreInteractions(showLoaderObserver)
     }
 
     @Test
@@ -180,11 +180,12 @@ class TransactionsViewModelTest {
         )
 
         viewModel.multiAddrParameter.onNext(testXPub)
-        viewModel.pullToRefreshTriggered.onNext(Unit)
         viewModel.isPullToRefreshing.value = true
 
-        Mockito.verify(getWalletInfoUseCase, Mockito.times(2)).execute(testXPub)
-        Assert.assertFalse(viewModel.showLoader.value!!)
+        val inOrder = Mockito.inOrder(showLoaderObserver)
+        inOrder.verify(showLoaderObserver).onChanged(true)
+        inOrder.verify(showLoaderObserver).onChanged(false)
+        Mockito.verifyNoMoreInteractions(showLoaderObserver)
     }
 
     @Test
@@ -277,7 +278,6 @@ class TransactionsViewModelTest {
         viewModel.multiAddrParameter.onNext(testXPub)
 
         Mockito.verify(errorDialogObserver).onChanged("Oups! Something went wrong. You can pull to refresh to retry!")
-
         Mockito.verifyNoMoreInteractions(errorDialogObserver)
     }
 

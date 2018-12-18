@@ -9,16 +9,16 @@ data class TransactionItem(
 )
 
 @DslMarker
-annotation class SimpleDsl1
+annotation class WalletDsl
 
-@SimpleDsl1
+@WalletDsl
 fun wallet(setup: WalletBuilder.() -> Unit): Wallet {
     val walletBuilder = WalletBuilder()
     walletBuilder.setup()
     return walletBuilder.build()
 }
 
-@SimpleDsl1
+@WalletDsl
 class WalletBuilder {
     lateinit var balance: String
     private val transactions = mutableListOf<TransactionItem>()
@@ -38,7 +38,7 @@ class WalletBuilder {
     }
 }
 
-@SimpleDsl1
+@WalletDsl
 class TransactionBuilder {
     private val addresses = mutableListOf<String>()
 
@@ -59,7 +59,7 @@ class TransactionBuilder {
 
 }
 
-@SimpleDsl1
+@WalletDsl
 class AddressBuilder(private val address: String) {
 
     fun build(): String {
