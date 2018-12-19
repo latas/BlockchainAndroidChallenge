@@ -25,21 +25,32 @@ class TransactionsViewModel @Inject constructor(
 
     private val bag = CompositeDisposable()
     private val wallet = MutableLiveData<Result<Wallet>>()
+    private val requiresLoader = MutableLiveData<Boolean>()
 
-    //input
-    val isPullToRefreshing = MutableLiveData<Boolean>()
-
+    //inputs
     val viewLoadTriggered: BehaviorSubject<Unit> = BehaviorSubject.create<Unit>()
-    val dataRefreshRequested: PublishSubject<Unit> = PublishSubject.create<Unit>()
+    val retryTriggered: PublishSubject<Unit> = PublishSubject.create<Unit>()
+    val pullToRefreshTriggered: PublishSubject<Unit> = PublishSubject.create<Unit>()
+
 
     private val dataRequestInput =
-        viewLoadTriggered.distinct().mergeWith(dataRefreshRequested)
+        viewLoadTriggered.distinct().doOnNext {
+            requiresLoader.postValue(true)
+        }.mergeWith(retryTriggered.doOnNext {
+            requiresLoader.postValue(true)
+        }).mergeWith(pullToRefreshTriggered.doOnNext {
+            requiresLoader.postValue(false)
+        })
 
     //outputs
-
     private val loading: LiveData<Boolean> = Transformations.map(wallet) { resource ->
         resource.isLoading
     }
+
+    val showLoader: LiveData<Boolean> =
+        Transformations.map(loading.withLatestFrom(requiresLoader)) { (isLoading, requiresLoader) ->
+            isLoading == true && requiresLoader == true
+        }
 
     val balance: LiveData<String> = Transformations.map(wallet) { resource ->
         when (resource) {
@@ -48,18 +59,12 @@ class TransactionsViewModel @Inject constructor(
         }
     }
 
-    val showLoader = Transformations.map(isPullToRefreshing.merge(loading)) { (isPullToRefreshing, isLoading) ->
-        isLoading == true && !(isPullToRefreshing ?: false)
+    val canBeRefreshed: LiveData<Boolean> = Transformations.map(wallet) {
+        it.isLoading.not()
     }
 
-
-    val pullToRefreshEnabled: LiveData<Boolean> = Transformations.map(loading) {
-        it.not()
-    }
-    val refreshStopped: LiveData<Unit> = Transformations.map(wallet) { result ->
-        if (result.isLoading.not()) {
-            Unit
-        }
+    val refreshStopped: LiveData<Boolean> = Transformations.map(wallet) { result ->
+        result.isLoading.not()
     }
 
     private val transactionItems: LiveData<List<TransactionItem>> = wallet.mapSuccess {

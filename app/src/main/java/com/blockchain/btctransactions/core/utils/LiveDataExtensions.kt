@@ -17,7 +17,6 @@ fun <T : Any, U> LiveData<Result<T>>.mapSuccess(func: (T) -> U): LiveData<U> {
 }
 
 
-
 fun <A, B> LiveData<A>.merge(b: LiveData<B>): LiveData<Pair<A?, B?>> = mergeLiveData(this, b)
 
 fun <A, B> mergeLiveData(a: LiveData<A>, b: LiveData<B>): LiveData<Pair<A?, B?>> {
@@ -27,7 +26,7 @@ fun <A, B> mergeLiveData(a: LiveData<A>, b: LiveData<B>): LiveData<Pair<A?, B?>>
         var lastB: B? = null
 
         fun update() {
-            this.value = lastA to lastB
+            this.postValue(lastA to lastB)
         }
 
         addSource(a) {
@@ -44,9 +43,29 @@ fun <A, B> mergeLiveData(a: LiveData<A>, b: LiveData<B>): LiveData<Pair<A?, B?>>
 fun <T> LiveData<T>.single(): LiveData<T> {
     val singleLiveData = SingleLiveEvent<T>()
     singleLiveData.addSource(this) {
-        singleLiveData.value = it
+        singleLiveData.postValue(it)
     }
     return singleLiveData
+}
+
+fun <A, B> LiveData<A>.withLatestFrom(b: LiveData<B>): LiveData<Pair<A?, B?>> {
+    return MediatorLiveData<Pair<A?, B?>>().apply {
+
+        var lastA: A? = null
+        var lastB: B? = null
+
+        fun update() {
+            this.postValue(lastA to lastB)
+        }
+
+        addSource(this@withLatestFrom) {
+            lastA = it
+            update()
+        }
+        addSource(b) {
+            lastB = it
+        }
+    }
 }
 
 inline fun <T> LiveData<T>.filter(crossinline predicate: (T?) -> Boolean): LiveData<T> {

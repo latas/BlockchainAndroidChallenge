@@ -6,12 +6,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.blockchain.btctransactions.R
-import com.blockchain.btctransactions.core.ui.setVisibility
 import com.blockchain.btctransactions.databinding.FragmentTransactionsBinding
 import com.blockchain.btctransactions.viewmodel.AppViewModelFactory
 import dagger.android.support.AndroidSupportInjection
@@ -43,12 +46,20 @@ class TransactionsFragment : Fragment() {
         }
 
         binding.btnRetry.setOnClickListener {
-            viewModel.dataRefreshRequested.onNext(Unit)
+            viewModel.retryTriggered.onNext(Unit)
         }
         binding.swipeContainer.setOnRefreshListener {
-            viewModel.dataRefreshRequested.onNext(Unit)
+            viewModel.pullToRefreshTriggered.onNext(Unit)
         }
+        setUpRecyclerView(binding.rvTransactions)
+
         return binding.root
+    }
+
+
+    private fun setUpRecyclerView(rvTransactions: RecyclerView) {
+        rvTransactions.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+        rvTransactions.adapter = TransactionsAdapter()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

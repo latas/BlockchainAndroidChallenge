@@ -12,26 +12,8 @@ fun View.setVisibility(isVisible: Boolean) {
 }
 
 @BindingAdapter("stopRefresh")
-fun SwipeRefreshLayout.isRefreshing(refreshStopped: Unit?) {
-    refreshStopped?.let {
-        this.isRefreshing = false
+fun SwipeRefreshLayout.isRefreshing(refreshStopped: Boolean) {
+    if (refreshStopped) {
+        isRefreshing = false
     }
 }
-
-@BindingAdapter("refresh")
-fun SwipeRefreshLayoutWithStateListener.setRefresh(refreshing: Boolean) {
-
-}
-
-@BindingAdapter("refreshAttrChanged")
-fun SwipeRefreshLayoutWithStateListener.setOnRefreshStateChanged(bindingListener: InverseBindingListener) {
-    refreshStateListener = object : RefreshStateListener {
-        override fun onRefreshStateChanged(refreshing: Boolean) {
-            bindingListener.onChange()
-        }
-    }
-}
-
-@InverseBindingAdapter(attribute = "refresh")
-fun isRefreshing(swipeRefreshLayout: SwipeRefreshLayoutWithStateListener): Boolean =
-    swipeRefreshLayout.isRefreshing

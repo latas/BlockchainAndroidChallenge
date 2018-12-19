@@ -31,9 +31,9 @@ class TransactionsViewModelTest {
     @Mock
     private lateinit var resourceFacade: ResourceFacade
     @Mock
-    private lateinit var refreshStopObserver: Observer<Unit?>
+    private lateinit var refreshStopObserver: Observer<Boolean>
     @Mock
-    private lateinit var pullToRefreshEnabledObserver: Observer<Boolean>
+    private lateinit var canBeRefreshed: Observer<Boolean>
     @Mock
     private lateinit var transactionItemsObserver: Observer<List<TransactionItemViewModel>>
     @Mock
@@ -53,7 +53,7 @@ class TransactionsViewModelTest {
         viewModel = TransactionsViewModel(getWalletInfoUseCase, resourceFacade)
         viewModel.balance.observeForever(balanceObserver)
         viewModel.showLoader.observeForever(showLoaderObserver)
-        viewModel.pullToRefreshEnabled.observeForever(pullToRefreshEnabledObserver)
+        viewModel.canBeRefreshed.observeForever(canBeRefreshed)
         viewModel.refreshStopped.observeForever(refreshStopObserver)
         viewModel.transactionItemsViewModel.observeForever(transactionItemsObserver)
         viewModel.errorUiWidgetVisible.observeForever(errorUiWidgetVisibilityObserver)
@@ -157,19 +157,16 @@ class TransactionsViewModelTest {
     }
 
     @Test
-    fun showLoaderIsFalseWhenAddrParameterGivenAndPulltoRefreshTriggered() {
+    fun showLoaderIsFalseWhenPulltoRefreshTriggered() {
         Mockito.`when`(getWalletInfoUseCase.execute()).thenReturn(
             Observable.just(
                 Result.Loading
             )
         )
 
-        viewModel.viewLoadTriggered.onNext(Unit)
-        viewModel.isPullToRefreshing.value = true
+        viewModel.pullToRefreshTriggered.onNext(Unit)
 
-        val inOrder = Mockito.inOrder(showLoaderObserver)
-        inOrder.verify(showLoaderObserver).onChanged(true)
-        inOrder.verify(showLoaderObserver).onChanged(false)
+        Mockito.verify(showLoaderObserver).onChanged(false)
         Mockito.verifyNoMoreInteractions(showLoaderObserver)
     }
 
@@ -182,7 +179,7 @@ class TransactionsViewModelTest {
         )
         viewModel.viewLoadTriggered.onNext(Unit)
 
-        Mockito.verify(refreshStopObserver).onChanged(Unit)
+        Mockito.verify(refreshStopObserver).onChanged(true)
         Mockito.verifyNoMoreInteractions(refreshStopObserver)
     }
 
@@ -195,8 +192,8 @@ class TransactionsViewModelTest {
         )
         viewModel.viewLoadTriggered.onNext(Unit)
 
-        Mockito.verify(pullToRefreshEnabledObserver).onChanged(false)
-        Mockito.verifyNoMoreInteractions(pullToRefreshEnabledObserver)
+        Mockito.verify(canBeRefreshed).onChanged(false)
+        Mockito.verifyNoMoreInteractions(canBeRefreshed)
     }
 
     @Test
@@ -245,9 +242,22 @@ class TransactionsViewModelTest {
             )
         )
         viewModel.viewLoadTriggered.onNext(Unit)
+        val inOrder = Mockito.inOrder(errorUiWidgetVisibilityObserver)
+        inOrder.verify(errorUiWidgetVisibilityObserver).onChanged(false)
+        inOrder.verify(errorUiWidgetVisibilityObserver).onChanged(true)
+        Mockito.verifyNoMoreInteractions(errorUiWidgetVisibilityObserver)
+    }
 
-        Mockito.verify(errorUiWidgetVisibilityObserver).onChanged(true)
-        Assert.assertTrue(viewModel.errorUiWidgetVisible.value!!)
+    @Test
+    fun showLoaderWhenRetryTriggeredAndLoadingReturned() {
+        Mockito.`when`(getWalletInfoUseCase.execute()).thenReturn(
+            Observable.just(
+                Result.Loading
+            )
+        )
+        viewModel.retryTriggered.onNext(Unit)
+        Mockito.verify(showLoaderObserver).onChanged(true)
+        Mockito.verifyNoMoreInteractions(showLoaderObserver)
     }
 
     @Test
@@ -277,7 +287,6 @@ class TransactionsViewModelTest {
             .thenReturn("Oups! Something went wrong. You can pull to refresh to retry!")
 
         viewModel.viewLoadTriggered.onNext(Unit)
-
         Mockito.verify(errorDialogObserver).onChanged("Oups! Something went wrong. You can pull to refresh to retry!")
     }
 
@@ -298,7 +307,7 @@ class TransactionsViewModelTest {
             )
         )
 
-        viewModel.dataRefreshRequested.onNext(Unit)
+        viewModel.retryTriggered.onNext(Unit)
 
         Mockito.verify(transactionItemsObserver)
             .onChanged(wallet_with_transactions.transactionItems.map {
