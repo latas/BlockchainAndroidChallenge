@@ -1,12 +1,14 @@
 package com.blockchain.btctransactions.core.utils
 
-class TimeInterval<out T : MeasureUnit>(val value: Number, private val unitInstance: () -> T) {
+class TimeInterval<out T : MeasureUnit>(value: Number, private val unitInstance: () -> T) {
 
     companion object {
         inline operator fun <reified U : MeasureUnit> invoke(value: Number) = TimeInterval(value) {
             U::class.java.newInstance()
         }
     }
+
+    val value = value.toDouble()
 
     val longValue: Long
         get() = value.toLong()
@@ -19,7 +21,7 @@ class TimeInterval<out T : MeasureUnit>(val value: Number, private val unitInsta
 
     private inline fun <reified U : MeasureUnit> convert(): TimeInterval<U> {
         val newUnitInstance = U::class.java.newInstance()
-        return TimeInterval(value.toDouble() * unitInstance().convertTo(newUnitInstance))
+        return TimeInterval(value * unitInstance().convertTo(newUnitInstance))
     }
 }
 

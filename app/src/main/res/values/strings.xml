@@ -2,4 +2,5 @@
     <string name="app_name">BTCTransactions</string>
     <string name="common_error_message">Oups! Something went wrong. You can pull to refresh to retry!</string>
     <string name="today_with_time">Today %1$s</string>
+    <string name="bitcoin_symbol" translatable="false">BTC</string>
 </resources>

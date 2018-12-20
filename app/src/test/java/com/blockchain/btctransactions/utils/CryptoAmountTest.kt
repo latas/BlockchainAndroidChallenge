@@ -1,9 +1,9 @@
 package com.blockchain.btctransactions.utils.formatters
 
-import bitcoin
+import com.blockchain.btctransactions.core.utils.bitcoin
+import com.blockchain.btctransactions.core.utils.satoshis
 import org.junit.Assert
 import org.junit.Test
-import satoshis
 
 class CryptoAmountTest {
 
