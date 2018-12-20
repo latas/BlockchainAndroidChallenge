@@ -15,4 +15,4 @@ fun <T : Any> Single<T>.toResult(): Observable<Result<T>> =
     }
 
 fun <T : Any> Observable<Result<T>>.withLoading(): Observable<Result<T>> =
-    this.zipWith(Observable.timer(1, TimeUnit.MILLISECONDS)) { res, _ -> res }.startWith(Result.Loading)
+    this.zipWith(Observable.timer(1, TimeUnit.SECONDS)) { res, _ -> res }.startWith(Result.Loading)

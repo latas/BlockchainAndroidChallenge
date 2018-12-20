@@ -33,6 +33,8 @@ class AddressRepositoryTest {
             .thenReturn(Single.just(TestData.multiAddressData))
         val testObservable = repository.getAddresses(testXPub).test()
 
+        testObservable.awaitTerminalEvent()
+
         testObservable.assertTerminated()
         testObservable.assertComplete()
         testObservable.assertValues(Result.Loading, Result.Success(TestData.multiAddressData))
@@ -44,6 +46,8 @@ class AddressRepositoryTest {
         Mockito.`when`(appService.multiAddress(testXPub))
             .thenReturn(Single.error(exception))
         val testObservable = repository.getAddresses(testXPub).test()
+
+        testObservable.awaitTerminalEvent()
 
         testObservable.assertTerminated()
         testObservable.assertComplete()

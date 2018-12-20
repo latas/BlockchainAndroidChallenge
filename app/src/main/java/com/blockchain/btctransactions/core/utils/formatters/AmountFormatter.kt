@@ -15,6 +15,6 @@ class AmountFormatter @Inject constructor(
     fun CryptoAmount<Bitcoin>.formattedRoundedToDigits(digits: Int): String =
         with(numberFormatter) {
             value.roundToFractionDigits(digits)
-        }.bitcoin.value.toBigDecimal().stripTrailingZeros().toString().plus(" ").plus(resourceFacade.getString(R.string.bitcoin_symbol))
+        }.bitcoin.value.toString().toBigDecimal().stripTrailingZeros().toPlainString().plus(" ").plus(resourceFacade.getString(R.string.bitcoin_symbol))
 }
 

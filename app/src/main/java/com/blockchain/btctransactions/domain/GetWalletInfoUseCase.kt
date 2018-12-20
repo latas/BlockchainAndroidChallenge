@@ -66,6 +66,4 @@ class GetWalletInfoUseCase @Inject constructor(
         with(amountFormatter) {
             satoshis.toBitcoin.formattedRoundedToDigits(significantDigits)
         }
-
-
 }

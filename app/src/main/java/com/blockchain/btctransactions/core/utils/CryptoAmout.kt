@@ -25,13 +25,12 @@ class CryptoAmount<T : MeasureUnit>(value: Number, private val unitInstance: () 
     }
 }
 
-class Satoshis : MeasureUnit {
+class Bitcoin : MeasureUnit {
     override val factor = 1.0
-
 }
 
-class Bitcoin : MeasureUnit {
-    override val factor = Math.E.pow(8)
+class Satoshis : MeasureUnit {
+    override val factor = 1 / 100000000.toDouble()
 }
 
 val Number.bitcoin: CryptoAmount<Bitcoin>
