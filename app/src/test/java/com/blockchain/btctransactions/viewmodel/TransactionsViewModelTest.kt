@@ -33,8 +33,6 @@ class TransactionsViewModelTest {
     @Mock
     private lateinit var refreshStopObserver: Observer<Boolean>
     @Mock
-    private lateinit var canBeRefreshed: Observer<Boolean>
-    @Mock
     private lateinit var transactionItemsObserver: Observer<List<TransactionItemViewModel>>
     @Mock
     private lateinit var errorUiWidgetVisibilityObserver: Observer<Boolean>
@@ -53,7 +51,6 @@ class TransactionsViewModelTest {
         viewModel = TransactionsViewModel(getWalletInfoUseCase, resourceFacade)
         viewModel.balance.observeForever(balanceObserver)
         viewModel.showLoader.observeForever(showLoaderObserver)
-        viewModel.canBeRefreshed.observeForever(canBeRefreshed)
         viewModel.refreshStopped.observeForever(refreshStopObserver)
         viewModel.transactionItemsViewModel.observeForever(transactionItemsObserver)
         viewModel.errorUiWidgetVisible.observeForever(errorUiWidgetVisibilityObserver)
@@ -88,16 +85,12 @@ class TransactionsViewModelTest {
         viewModel.viewLoadTriggered.onNext(Unit)
 
         Mockito.verify(balanceObserver)
-            .onChanged(String())
-
-        Mockito.verify(balanceObserver)
             .onChanged(wallet_with_no_transactions.balance)
-
-        Assert.assertEquals(wallet_with_no_transactions.balance, viewModel.balance.value)
+        Mockito.verifyNoMoreInteractions(balanceObserver)
     }
 
     @Test
-    fun balanceIsEmptyWhenErrorIsReturned() {
+    fun nothingHappensToBalanceWhenErrorIsReturned() {
         Mockito.`when`(getWalletInfoUseCase.execute()).thenReturn(
             Observable.just(
                 Result.Error(Exception())
@@ -105,10 +98,8 @@ class TransactionsViewModelTest {
         )
         viewModel.viewLoadTriggered.onNext(Unit)
 
-        Mockito.verify(balanceObserver)
+        Mockito.verify(balanceObserver, Mockito.never())
             .onChanged(String())
-        Mockito.verifyNoMoreInteractions(balanceObserver)
-
     }
 
     @Test
@@ -181,19 +172,6 @@ class TransactionsViewModelTest {
 
         Mockito.verify(refreshStopObserver).onChanged(true)
         Mockito.verifyNoMoreInteractions(refreshStopObserver)
-    }
-
-    @Test
-    fun pullToRefreshIsNotEnabledWhenLoadingReturned() {
-        Mockito.`when`(getWalletInfoUseCase.execute()).thenReturn(
-            Observable.just(
-                Result.Loading
-            )
-        )
-        viewModel.viewLoadTriggered.onNext(Unit)
-
-        Mockito.verify(canBeRefreshed).onChanged(false)
-        Mockito.verifyNoMoreInteractions(canBeRefreshed)
     }
 
     @Test

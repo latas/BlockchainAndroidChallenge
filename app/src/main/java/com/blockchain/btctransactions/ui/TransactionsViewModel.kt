@@ -52,19 +52,12 @@ class TransactionsViewModel @Inject constructor(
             isLoading == true && requiresLoader == true
         }
 
-    val balance: LiveData<String> = Transformations.map(wallet) { resource ->
-        when (resource) {
-            is Result.Success -> resource.data.balance
-            else -> String()
-        }
+    val balance: LiveData<String> = wallet.mapSuccess { data ->
+        data.balance
     }
 
-    val canBeRefreshed: LiveData<Boolean> = Transformations.map(wallet) {
-        it.isLoading.not()
-    }
-
-    val refreshStopped: LiveData<Boolean> = Transformations.map(wallet) { result ->
-        result.isLoading.not()
+    val refreshStopped: LiveData<Boolean> = Transformations.map(loading) { loading ->
+        loading == false
     }
 
     private val transactionItems: LiveData<List<TransactionItem>> = wallet.mapSuccess {

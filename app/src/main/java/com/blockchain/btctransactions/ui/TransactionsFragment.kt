@@ -26,6 +26,8 @@ class TransactionsFragment : Fragment() {
     @Inject
     lateinit var viewModelFactory: AppViewModelFactory
 
+    private val transactionsAdapter = TransactionsAdapter()
+
     private val viewModel by lazy {
         ViewModelProviders.of(this, viewModelFactory).get(TransactionsViewModel::class.java)
     }
@@ -59,7 +61,7 @@ class TransactionsFragment : Fragment() {
 
     private fun setUpRecyclerView(rvTransactions: RecyclerView) {
         rvTransactions.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
-        rvTransactions.adapter = TransactionsAdapter()
+        rvTransactions.adapter = transactionsAdapter
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -67,13 +69,15 @@ class TransactionsFragment : Fragment() {
 
         viewModel.showErrorDialog.observe(this, Observer {
             val alertDialog = AlertDialog.Builder(activity).create()
-            alertDialog.setTitle("Alert")
+            alertDialog.setTitle("Error")
             alertDialog.setMessage(it)
             alertDialog.setButton(
                 AlertDialog.BUTTON_POSITIVE, "OK"
             ) { dialog, _ -> dialog.dismiss() }
             alertDialog.show()
         })
+
+        viewModel.transactionItemsViewModel.observe(this, transactionsAdapter)
         viewModel.viewLoadTriggered.onNext(Unit)
     }
 }
