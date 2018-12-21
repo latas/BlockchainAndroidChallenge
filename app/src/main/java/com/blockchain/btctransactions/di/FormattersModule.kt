@@ -16,7 +16,7 @@ class FormattersModule {
 
     @Provides
     @PerApplication
-    fun amountFormatter(): NumberFormatter = NumberFormatter()
+    fun numberFormatter(): NumberFormatter = NumberFormatter()
 
 
 }
