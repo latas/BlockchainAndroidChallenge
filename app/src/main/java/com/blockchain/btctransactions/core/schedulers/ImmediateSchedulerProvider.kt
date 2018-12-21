@@ -1,7 +1,7 @@
 package com.blockchain.btctransactions.core.schedulers
 
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.Scheduler
+import io.reactivex.schedulers.Schedulers
 
 
 class ImmediateSchedulerProvider : BaseSchedulerProvider {

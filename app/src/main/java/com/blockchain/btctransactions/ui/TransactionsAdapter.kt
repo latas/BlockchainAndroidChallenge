@@ -3,9 +3,9 @@ package com.blockchain.btctransactions.ui
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.blockchain.btctransactions.databinding.LayoutTransactionItemCellBinding
-import androidx.recyclerview.widget.DiffUtil
 
 
 class TransactionsAdapter : RecyclerView.Adapter<TransactionsAdapter.ViewHolder>(),

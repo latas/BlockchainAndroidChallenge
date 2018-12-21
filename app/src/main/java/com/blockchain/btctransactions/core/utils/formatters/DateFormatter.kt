@@ -4,7 +4,8 @@ import com.blockchain.btctransactions.R
 import com.blockchain.btctransactions.core.data.ResourceFacade
 import com.blockchain.btctransactions.core.utils.Second
 import com.blockchain.btctransactions.core.utils.TimeInterval
-import org.threeten.bp.*
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.ZoneOffset
 import org.threeten.bp.format.DateTimeFormatter
 import javax.inject.Inject
 

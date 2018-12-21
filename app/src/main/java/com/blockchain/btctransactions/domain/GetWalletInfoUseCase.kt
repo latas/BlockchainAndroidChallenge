@@ -53,7 +53,7 @@ class GetWalletInfoUseCase @Inject constructor(
                     hash = transactionData.hash
                     fee = transactionData.fee.formatSatoshisAmount()
                     transactionData.outputs.filter {
-                        xpub != it.xPub?.key //not clear from the project description
+                        xpub != it.xPub?.key
                     }.map {
                         address(it.address)
                     }

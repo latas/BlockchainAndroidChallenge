@@ -1,6 +1,9 @@
 package com.blockchain.btctransactions
 
-import com.blockchain.btctransactions.data.*
+import com.blockchain.btctransactions.data.MultiAddressData
+import com.blockchain.btctransactions.data.TransactionType
+import com.blockchain.btctransactions.data.Wallet
+import com.blockchain.btctransactions.data.wallet
 import com.google.gson.Gson
 import okio.Okio
 

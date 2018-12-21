@@ -1,7 +1,5 @@
 package com.blockchain.btctransactions.core.utils
 
-import kotlin.math.pow
-
 
 class CryptoAmount<T : MeasureUnit>(value: Number, private val unitInstance: () -> T) {
 
